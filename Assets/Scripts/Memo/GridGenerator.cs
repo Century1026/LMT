@@ -19,10 +19,13 @@ public class GridTrialGenerator : MonoBehaviour
 
     private List<GameObject> gridCells = new List<GameObject>();
     private int i = 0;
-
+    
     void OnEnable()
     {
-        GenerateGrid(levelSelection);
+        if (i == 0)
+        {
+            GenerateGrid(levelSelection);
+        }
         PlaceIconsOnGrid(GenerateTrialSet(levelSelection));
         StartCoroutine(ReturnToOtherPage());
         // Debug.Log("OnEnable");
@@ -30,10 +33,10 @@ public class GridTrialGenerator : MonoBehaviour
 
     void GenerateGrid(int level)
     {
-        foreach (Transform child in baseContainer)
-        {
-            Destroy(child.gameObject);
-        }
+        // foreach (Transform child in baseContainer)
+        // {
+        //     Destroy(child.gameObject);
+        // }
 
         gridCells.Clear();
 
@@ -72,7 +75,7 @@ public class GridTrialGenerator : MonoBehaviour
         List<string> selectedIcons = iconPaths.GetRange(0, trialCount);
 
         // Assign positions and store them in the dictionary
-        Dictionary<string, GameObject> iconPositionPairs = new Dictionary<string, GameObject>();
+        var iconPositionPairs = new Dictionary<string, GameObject>();
         for (int i = 0; i < trialCount; i++)
             iconPositionPairs[selectedIcons[i]] = gridCells[i];
         return iconPositionPairs;
@@ -80,12 +83,6 @@ public class GridTrialGenerator : MonoBehaviour
 
     List<string> LoadIconPaths()
     {
-        if (!Directory.Exists(iconFolderPath))
-        {
-            Debug.LogError("Icon folder path does not exist: " + iconFolderPath);
-            return null;
-        }
-
         string[] files = Directory.GetFiles(iconFolderPath, "*.png");
         return new List<string>(files);
     }
@@ -116,47 +113,28 @@ public class GridTrialGenerator : MonoBehaviour
     }
 
     void PlaceIconOnGrid(GameObject gridCell, string iconPath)
-    // List<IconPositionPair> iconPositionPairs
     {
         Texture2D iconTexture = LoadTextureFromFile(iconPath);
-        if (iconTexture == null)
-        {
-            Debug.LogError("Failed to load texture: " + iconPath);
-            return;
-        }
 
         Sprite iconSprite = Sprite.Create(iconTexture, new Rect(0, 0, iconTexture.width, iconTexture.height), new Vector2(0.5f, 0.5f));
-        GameObject iconObject = new GameObject("Icon");
-        iconObject.transform.SetParent(gridCell.transform, false);
-
+        var iconObject = new GameObject("Icon");
         Image iconImage = iconObject.AddComponent<Image>();
         iconImage.sprite = iconSprite;
-        iconImage.rectTransform.sizeDelta = new Vector2(80f, 80f);
-        iconImage.rectTransform.anchoredPosition = Vector2.zero;
+
+        iconObject.transform.SetParent(gridCell.transform, false);
     }
 
     Texture2D LoadTextureFromFile(string filePath)
     {
-        if (!File.Exists(filePath))
-            return null;
-
-        byte[] fileData = File.ReadAllBytes(filePath);
-        Texture2D texture = new Texture2D(2, 2);
-        if (texture.LoadImage(fileData))
-        {
-            return texture;
-        }
-        return null;
+        var texture = new Texture2D(2, 2);
+        texture.LoadImage(File.ReadAllBytes(filePath));
+        return texture;
     }
-
-
 
     IEnumerator ReturnToOtherPage()
     {
         yield return new WaitForSeconds(displayDuration);
         gridPage.SetActive(false);  // Hide the Grid Page
         otherPage.SetActive(true); // Show the Other Page
-        // Debug.Log("ReturnToOtherPage");
-        // Start();
     }
 }
