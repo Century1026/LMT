@@ -18,28 +18,20 @@ public class GridTrialGenerator : MonoBehaviour
     public float displayDuration = 1f; // Time to display the Grid Page
 
     private List<GameObject> gridCells = new List<GameObject>();
-    private int i = 0;
+    private int TrialCount = 0;
     
     void OnEnable()
     {
-        if (i == 0)
+        if (TrialCount == 0)
         {
             GenerateGrid(levelSelection);
         }
-        PlaceIconsOnGrid(GenerateTrialSet(levelSelection));
+        IconsDisplay(GenerateTrialSet(levelSelection));
         StartCoroutine(ReturnToOtherPage());
-        // Debug.Log("OnEnable");
     }
 
     void GenerateGrid(int level)
     {
-        // foreach (Transform child in baseContainer)
-        // {
-        //     Destroy(child.gameObject);
-        // }
-
-        gridCells.Clear();
-
         int gridSize = level + 1;
         float gridCellSize = 100f;
         float spacing = 20f;
@@ -98,21 +90,18 @@ public class GridTrialGenerator : MonoBehaviour
         }
     }
 
-    void PlaceIconsOnGrid(Dictionary<string, GameObject> iconPositionPairs)
+    void IconsDisplay(Dictionary<string, GameObject> iconPositionPairs)
     {
-
         var keys = new List<string>(iconPositionPairs.Keys);
-        if (i < keys.Count)
+        if (TrialCount < keys.Count)
         {
-            string key = keys[i];
-            PlaceIconOnGrid(iconPositionPairs[key], keys[i]);
-            Debug.Log(keys[i]);
-            i++;
-            Debug.Log("PlaceIconsOnGrid");
+            IconGenerate(iconPositionPairs[keys[TrialCount]], keys[TrialCount]);
+            Debug.Log(keys[TrialCount]);
+            TrialCount++;
         }
     }
 
-    void PlaceIconOnGrid(GameObject gridCell, string iconPath)
+    GameObject IconGenerate(GameObject gridCell, string iconPath)
     {
         Texture2D iconTexture = LoadTextureFromFile(iconPath);
 
@@ -122,6 +111,8 @@ public class GridTrialGenerator : MonoBehaviour
         iconImage.sprite = iconSprite;
 
         iconObject.transform.SetParent(gridCell.transform, false);
+
+        return iconObject;
     }
 
     Texture2D LoadTextureFromFile(string filePath)
@@ -134,6 +125,7 @@ public class GridTrialGenerator : MonoBehaviour
     IEnumerator ReturnToOtherPage()
     {
         yield return new WaitForSeconds(displayDuration);
+        Destroy(gridCells[TrialCount-1].transform.GetChild(0).gameObject);
         gridPage.SetActive(false);  // Hide the Grid Page
         otherPage.SetActive(true); // Show the Other Page
     }
