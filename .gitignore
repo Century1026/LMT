@@ -1,0 +1,22 @@
+# Ignore everything
+*
+
+# Except the .gitignore file itself
+!.gitignore
+
+# Except the Assets folder
+!Assets/
+
+# Ignore everything in the Assets folder
+Assets/*
+
+# Except the Scripts folder within Assets
+!Assets/Scripts/
+
+# Allow all files within the Scripts folder
+!Assets/Scripts/**
+
+# Ignore all .cs.meta files
+*.cs.meta
+
+*.meta
