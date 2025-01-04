@@ -65,18 +65,6 @@ public class GridTrialGenerator : MonoBehaviour
                 GameObject gridCell = Instantiate(gridPrefab, baseContainer);
                 gridCell.GetComponent<RectTransform>().anchoredPosition = new Vector2(xPos, yPos);
                 gridCell.SetActive(true);
-                // Image gridImage = gridCell.GetComponent<Image>();
-                // if (gridImage != null)
-                // {
-                //     gridImage.enabled = true;
-                // }
-
-                // Button gridButton = gridCell.GetComponent<Button>();
-                // if (gridButton != null)
-                // {
-                //     gridButton.enabled = true;
-                // }
-
                 gridCells.Add(gridCell);
             }
         }
@@ -85,42 +73,17 @@ public class GridTrialGenerator : MonoBehaviour
     Dictionary<string, GameObject> GenerateTrialSet(int level)
     {
         List<string> iconPaths = LoadIconPaths();
-        if (iconPaths == null || iconPaths.Count == 0)
-        {
-            Debug.LogWarning("No icons found in the specified folder.");
-            return null;
-        }
-
         int gridSize = level + 1;
         int trialCount = gridSize * gridSize;
-
-        if (iconPaths.Count < trialCount)
-        {
-            Debug.LogError("Not enough icons to fill the grid.");
-            return null;
-        }
 
         // Shuffle and select a subset of icons
         ShuffleList(iconPaths);//shuffle pairs
         List<string> selectedIcons = iconPaths.GetRange(0, trialCount);
 
         // Assign positions and store them in the dictionary
-        // iconPositionPairs.Clear();
         Dictionary<string, GameObject> iconPositionPairs = new Dictionary<string, GameObject>();
         for (int i = 0; i < trialCount; i++)
-        {
-            // Vector2 gridPosition = gridCells[i].GetComponent<RectTransform>().anchoredPosition;
-            // iconPositionPairs[selectedIcons[i]] = gridPosition;
             iconPositionPairs[selectedIcons[i]] = gridCells[i];
-
-            // PlaceIconOnGrid(gridCells[i], selectedIcons[i]);//read pair
-        }
-//read only one pair
-        // Debug.Log("Trials generated successfully:");
-        // foreach (var pair in iconPositionPairs)
-        // {
-        //     Debug.Log($"Icon: {Path.GetFileName(pair.Key)}, Position: {pair.Value}");
-        // }
         return iconPositionPairs;
     }
 
@@ -149,13 +112,7 @@ public class GridTrialGenerator : MonoBehaviour
 
     void PlaceIconsOnGrid(Dictionary<string, GameObject> iconPositionPairs)
     {
-        // foreach (var pair in iconPositionPairs)
-        // {
-        //     Debug.Log(pair.Key);
-        //     PlaceIconOnGrid(pair.Value, pair.Key);
-        //     return;
-        // }
-        // int i = 0;
+
         var keys = new List<string>(iconPositionPairs.Keys);
         if (i < keys.Count)
         {
