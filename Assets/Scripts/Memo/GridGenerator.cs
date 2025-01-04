@@ -28,15 +28,6 @@ public class GridTrialGenerator : MonoBehaviour
         // Debug.Log("OnEnable");
     }
 
-    // void Start()
-    // {
-    //     GenerateGrid(levelSelection);
-    //     PlaceIconsOnGrid(GenerateTrialSet(levelSelection));
-    //     // OnEnable();
-    //     StartCoroutine(ReturnToOtherPage());
-    //     // Debug.Log("Start");
-    // }
-
     void GenerateGrid(int level)
     {
         foreach (Transform child in baseContainer)
