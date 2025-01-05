@@ -9,19 +9,23 @@ public class GridTrialGenerator : MonoBehaviour
     public Transform baseContainer;
     public GameObject gridPrefab;
     public GameObject pagePrompt;
-    public GameObject pageTask;  // Reference to this (Grid Page)
+    public GameObject pageTask;
     public int gridLength; // Determines grid size (2x2, 3x3, 4x4)
     public float displayDuration = 1f; // Time to display the Grid Page
     public string iconFolderPath = @"D:\Files\Programming\Unity\LMT\Assets\Icons";
 
     private readonly List<GameObject> gridCells = new();
-    private int trialCount = 0;
+    private Dictionary<string, GameObject> trial = null;
+    private int trialIndex = 0;
     
     void OnEnable()
     {
-        if (trialCount == 0)
+        if (trialIndex == 0)
+        {
             GenerateGrid(gridLength);
-        IconsDisplay(GenerateTrialSet(gridLength));
+            trial = GenerateTrialSet(gridLength);
+        }
+        IconsDisplay(trial);
         StartCoroutine(ReturnToOtherPage());
     }
 
@@ -51,12 +55,11 @@ public class GridTrialGenerator : MonoBehaviour
 
     Dictionary<string, GameObject> GenerateTrialSet(int gridLength)
     {
-        List<string> iconPaths = LoadIconPaths();
+        var iconPaths = new List<string>(Directory.GetFiles(iconFolderPath, "*.png"));
         int trialCount = gridLength * gridLength;
-
-        // Shuffle and select a subset of icons
-        ShuffleList(iconPaths);//shuffle pairs
+        
         List<string> selectedIcons = iconPaths.GetRange(0, trialCount);
+        ShuffleList(gridCells);//shuffle pairs
 
         // Assign positions and store them in the dictionary
         var iconPositionPairs = new Dictionary<string, GameObject>();
@@ -65,31 +68,23 @@ public class GridTrialGenerator : MonoBehaviour
         return iconPositionPairs;
     }
 
-    List<string> LoadIconPaths()
-    {
-        string[] files = Directory.GetFiles(iconFolderPath, "*.png");
-        return new List<string>(files);
-    }
-
     void ShuffleList<T>(List<T> list)
     {
         for (int i = list.Count - 1; i > 0; i--)
         {
             int rand = Random.Range(0, i + 1);
-            T temp = list[i];
-            list[i] = list[rand];
-            list[rand] = temp;
+            (list[i], list[rand]) = (list[rand], list[i]);
         }
     }
 
     void IconsDisplay(Dictionary<string, GameObject> iconPositionPairs)
     {
         var keys = new List<string>(iconPositionPairs.Keys);
-        if (trialCount < keys.Count)
+        if (trialIndex < keys.Count)
         {
-            IconGenerate(iconPositionPairs[keys[trialCount]], keys[trialCount]);
-            Debug.Log(keys[trialCount]);
-            trialCount++;
+            IconGenerate(iconPositionPairs[keys[trialIndex]], keys[trialIndex]);
+            Debug.Log(keys[trialIndex]);
+            trialIndex++;
         }
     }
 
@@ -117,7 +112,7 @@ public class GridTrialGenerator : MonoBehaviour
     IEnumerator ReturnToOtherPage()
     {
         yield return new WaitForSeconds(displayDuration);
-        Destroy(gridCells[trialCount-1].transform.GetChild(0).gameObject);
+        Destroy(gridCells[trialIndex-1].transform.GetChild(0).gameObject);
         pageTask.SetActive(false);  // Hide the Grid Page
         pagePrompt.SetActive(true); // Show the Other Page
     }
