@@ -6,19 +6,18 @@ public class OtherPageController : MonoBehaviour
     public GameObject otherPage; // Reference to this (Other Page)
     private int clickCount = 0; // Counter for button clicks
     public int maxClicks; // Maximum number of clicks to stop the loop
-    public GridTrialGenerator gridTrialGenerator;
-    //TODO use levelselection to determine maxClicks
+    public MainMemo mainMemo;
 
     public void OnButtonClick()
     {
-        if (gridTrialGenerator != null)
+        if (mainMemo != null)
         {
-            int repeats = gridTrialGenerator.gridLength; // Assuming levelSelection determines maxRepeats
+            int repeats = mainMemo.gridLength; // Assuming levelSelection determines maxRepeats
             maxClicks = (int)Mathf.Pow(repeats, 2); // Square of levelSelection
         }
         else
         {
-            Debug.LogError("GridTrialGenerator script not found. Defaulting maxRepeats to 5.");
+            Debug.LogError("mainMemo script not found. Defaulting maxRepeats to 5.");
             maxClicks = 4;
         }
 
