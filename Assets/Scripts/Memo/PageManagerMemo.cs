@@ -1,9 +1,9 @@
 using UnityEngine;
 
-public class OtherPageController : MonoBehaviour
+public class PageManagerMemo : MonoBehaviour
 {
-    public GameObject gridPage; // Reference to the Grid Page
-    public GameObject otherPage; // Reference to this (Other Page)
+    public GameObject pagePrompt; // Reference to this (Other Page)
+    public GameObject pageTask; // Reference to the Grid Page
     private int clickCount = 0; // Counter for button clicks
     public int maxClicks; // Maximum number of clicks to stop the loop
     public MainMemo mainMemo;
@@ -24,8 +24,8 @@ public class OtherPageController : MonoBehaviour
         clickCount++;
         if (clickCount <= maxClicks)
         {
-            otherPage.SetActive(false); // Hide this page
-            gridPage.SetActive(true);  // Show the Grid Page
+            pagePrompt.SetActive(false); // Hide this page
+            pageTask.SetActive(true);  // Show the Grid Page
         }
         else
         {
