@@ -6,7 +6,8 @@ using System.Collections;
 
 public class GridTrialGenerator : MonoBehaviour
 {
-    public Transform baseContainer;
+    public Transform gridContainer;
+    public GameObject imagePrefab;
     public GameObject gridPrefab;
     public GameObject pagePrompt;
     public GameObject pageTask;
@@ -45,9 +46,8 @@ public class GridTrialGenerator : MonoBehaviour
                 float xPos = startX + col * (gridCellSize + spacing);
                 float yPos = startY - row * (gridCellSize + spacing);
 
-                GameObject gridCell = Instantiate(gridPrefab, baseContainer);
+                GameObject gridCell = Instantiate(gridPrefab, gridContainer);
                 gridCell.GetComponent<RectTransform>().anchoredPosition = new Vector2(xPos, yPos);
-                gridCell.SetActive(true);
                 gridCells.Add(gridCell);
             }
         }
@@ -61,7 +61,6 @@ public class GridTrialGenerator : MonoBehaviour
         List<string> selectedIcons = iconPaths.GetRange(0, trialCount);
         ShuffleList(gridCells);//shuffle pairs
 
-        // Assign positions and store them in the dictionary
         var iconPositionPairs = new Dictionary<string, GameObject>();
         for (int i = 0; i < trialCount; i++)
             iconPositionPairs[selectedIcons[i]] = gridCells[i];
@@ -82,24 +81,17 @@ public class GridTrialGenerator : MonoBehaviour
         var keys = new List<string>(iconPositionPairs.Keys);
         if (trialIndex < keys.Count)
         {
-            IconGenerate(iconPositionPairs[keys[trialIndex]], keys[trialIndex]);
-            Debug.Log(keys[trialIndex]);
+            IconGenerate(imagePrefab, iconPositionPairs[keys[trialIndex]], keys[trialIndex]);
             trialIndex++;
         }
     }
 
-    GameObject IconGenerate(GameObject gridCell, string iconPath)
+    void IconGenerate(GameObject prefab, GameObject gridCell, string iconPath)
     {
         Texture2D iconTexture = LoadTextureFromFile(iconPath);
-
         Sprite iconSprite = Sprite.Create(iconTexture, new Rect(0, 0, iconTexture.width, iconTexture.height), new Vector2(0.5f, 0.5f));
-        var iconObject = new GameObject("Icon");
-        Image iconImage = iconObject.AddComponent<Image>();
-        iconImage.sprite = iconSprite;
-
-        iconObject.transform.SetParent(gridCell.transform, false);
-
-        return iconObject;
+        var iconObject = Instantiate(prefab, gridCell.transform, false);
+        iconObject.GetComponent<Image>().sprite = iconSprite;
     }
 
     Texture2D LoadTextureFromFile(string filePath)
