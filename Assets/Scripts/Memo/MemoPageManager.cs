@@ -13,8 +13,8 @@ public class OtherPageController : MonoBehaviour
     {
         if (gridTrialGenerator != null)
         {
-            int repeats = gridTrialGenerator.levelSelection; // Assuming levelSelection determines maxRepeats
-            maxClicks = (int)Mathf.Pow(repeats + 1, 2); // Square of levelSelection
+            int repeats = gridTrialGenerator.gridLength; // Assuming levelSelection determines maxRepeats
+            maxClicks = (int)Mathf.Pow(repeats, 2); // Square of levelSelection
         }
         else
         {

@@ -1,5 +1,3 @@
-// TODO generate trial at the very beginning. try define the functions first and only call them here
-
 using UnityEngine;
 using UnityEngine.UI;
 using System.IO;
@@ -8,45 +6,40 @@ using System.Collections;
 
 public class GridTrialGenerator : MonoBehaviour
 {
-    public GameObject gridPrefab;
     public Transform baseContainer;
-    public int levelSelection; // Determines grid size (2x2, 3x3, 4x4)
+    public GameObject gridPrefab;
+    public GameObject pagePrompt;
+    public GameObject pageTask;  // Reference to this (Grid Page)
+    public int gridLength; // Determines grid size (2x2, 3x3, 4x4)
+    public float displayDuration = 1f; // Time to display the Grid Page
     public string iconFolderPath = @"D:\Files\Programming\Unity\LMT\Assets\Icons";
 
-    public GameObject otherPage; // Reference to the Other Page
-    public GameObject gridPage;  // Reference to this (Grid Page)
-    public float displayDuration = 1f; // Time to display the Grid Page
-
-    private List<GameObject> gridCells = new List<GameObject>();
-    private int TrialCount = 0;
+    private readonly List<GameObject> gridCells = new();
+    private int trialCount = 0;
     
     void OnEnable()
     {
-        if (TrialCount == 0)
-        {
-            GenerateGrid(levelSelection);
-        }
-        IconsDisplay(GenerateTrialSet(levelSelection));
+        if (trialCount == 0)
+            GenerateGrid(gridLength);
+        IconsDisplay(GenerateTrialSet(gridLength));
         StartCoroutine(ReturnToOtherPage());
     }
 
-    void GenerateGrid(int level)
+    void GenerateGrid(int gridLength)
     {
-        int gridSize = level + 1;
         float gridCellSize = 100f;
         float spacing = 20f;
-        float adjustedSpacing = (gridSize == 3) ? spacing * 1.1f : spacing;
 
-        float totalSize = (gridSize * gridCellSize) + ((gridSize - 1) * adjustedSpacing);
+        float totalSize = (gridLength * gridCellSize) + ((gridLength - 1) * spacing);
         float startX = -totalSize / 2f + gridCellSize / 2f;
         float startY = totalSize / 2f - gridCellSize / 2f;
 
-        for (int row = 0; row < gridSize; row++)
+        for (int row = 0; row < gridLength; row++)
         {
-            for (int col = 0; col < gridSize; col++)
+            for (int col = 0; col < gridLength; col++)
             {
-                float xPos = startX + col * (gridCellSize + adjustedSpacing);
-                float yPos = startY - row * (gridCellSize + adjustedSpacing);
+                float xPos = startX + col * (gridCellSize + spacing);
+                float yPos = startY - row * (gridCellSize + spacing);
 
                 GameObject gridCell = Instantiate(gridPrefab, baseContainer);
                 gridCell.GetComponent<RectTransform>().anchoredPosition = new Vector2(xPos, yPos);
@@ -56,11 +49,10 @@ public class GridTrialGenerator : MonoBehaviour
         }
     }
 
-    Dictionary<string, GameObject> GenerateTrialSet(int level)
+    Dictionary<string, GameObject> GenerateTrialSet(int gridLength)
     {
         List<string> iconPaths = LoadIconPaths();
-        int gridSize = level + 1;
-        int trialCount = gridSize * gridSize;
+        int trialCount = gridLength * gridLength;
 
         // Shuffle and select a subset of icons
         ShuffleList(iconPaths);//shuffle pairs
@@ -93,11 +85,11 @@ public class GridTrialGenerator : MonoBehaviour
     void IconsDisplay(Dictionary<string, GameObject> iconPositionPairs)
     {
         var keys = new List<string>(iconPositionPairs.Keys);
-        if (TrialCount < keys.Count)
+        if (trialCount < keys.Count)
         {
-            IconGenerate(iconPositionPairs[keys[TrialCount]], keys[TrialCount]);
-            Debug.Log(keys[TrialCount]);
-            TrialCount++;
+            IconGenerate(iconPositionPairs[keys[trialCount]], keys[trialCount]);
+            Debug.Log(keys[trialCount]);
+            trialCount++;
         }
     }
 
@@ -125,8 +117,8 @@ public class GridTrialGenerator : MonoBehaviour
     IEnumerator ReturnToOtherPage()
     {
         yield return new WaitForSeconds(displayDuration);
-        Destroy(gridCells[TrialCount-1].transform.GetChild(0).gameObject);
-        gridPage.SetActive(false);  // Hide the Grid Page
-        otherPage.SetActive(true); // Show the Other Page
+        Destroy(gridCells[trialCount-1].transform.GetChild(0).gameObject);
+        pageTask.SetActive(false);  // Hide the Grid Page
+        pagePrompt.SetActive(true); // Show the Other Page
     }
 }
