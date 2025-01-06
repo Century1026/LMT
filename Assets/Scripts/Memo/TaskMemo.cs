@@ -30,6 +30,9 @@ public class TaskMemo : MonoBehaviour
         yield return new WaitForSeconds(displayDuration);
         Destroy(mainMemo.gridCells[trialCount].transform.GetChild(0).gameObject);
         pageTask.SetActive(false);  // Hide the Grid Page
-        pagePrompt.SetActive(true); // Show the Other Page
+        if (trialCount < pageManager.countMax - 1)
+            pagePrompt.SetActive(true); // Show the Other Page
+        else
+            Debug.Log("Reached maximum clicks. Stopping loop.");
     }
 }
