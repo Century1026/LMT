@@ -5,13 +5,12 @@ public class PromptMemo : MonoBehaviour
 {
     public GameObject imagePrefab;
     public GameObject imageContainer;
-    public PageManagerMemo pageManager;
     public MainMemo mainMemo;
     private int trialCount;
 
     void OnEnable()
     {
-        trialCount = pageManager.trialCount;
+        trialCount = mainMemo.trialCount;
         IconsDisplay(mainMemo.trial);
     }
 

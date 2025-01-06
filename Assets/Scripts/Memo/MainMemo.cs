@@ -9,12 +9,17 @@ public class MainMemo : MonoBehaviour
     public readonly List<GameObject> gridCells = new();
     public GameObject gridPrefab;
     public GameObject pagePrompt;
+    public GameObject pageTask; // Reference to the Grid Page
+    public PromptMemo promptMemo;
     public Transform gridContainer;
     public int gridLength; // Determines grid size (2x2, 3x3, 4x4)
-    public string iconFolderPath = @"D:\Files\Programming\Unity\LMT\Assets\Icons";
+    public int trialCount = 0; // Counter for button clicks
+    public int countMax; // Maximum number of clicks
+    private readonly string iconFolderPath = @"D:\Files\Programming\Unity\LMT\Assets\Icons";
     
     void Start()
     {
+        countMax = (int)Mathf.Pow(gridLength, 2);
         GridGenerate(gridLength);
         trial = TrialGenerate(gridLength);
         pagePrompt.SetActive(true);
@@ -74,5 +79,13 @@ public class MainMemo : MonoBehaviour
         Sprite iconSprite = Sprite.Create(iconTexture, new Rect(0, 0, iconTexture.width, iconTexture.height), new Vector2(0.5f, 0.5f));
         var iconObject = Instantiate(prefab, gridCell.transform, false);
         iconObject.GetComponent<Image>().sprite = iconSprite;
+    }
+
+    public void OnButtonClick()
+    {
+        Destroy(promptMemo.imageContainer.transform.GetChild(0).gameObject);
+        pagePrompt.SetActive(false); // Hide this page
+        pageTask.SetActive(true);  // Show the Grid Page
+        trialCount++;
     }
 }

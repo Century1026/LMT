@@ -7,14 +7,13 @@ public class TaskMemo : MonoBehaviour
     public GameObject imagePrefab;
     public GameObject pagePrompt;
     public GameObject pageTask;
-    public PageManagerMemo pageManager;
     public MainMemo mainMemo;
     public float displayDuration = 1f;
     private int trialCount;
     
     void OnEnable()
     {
-        trialCount = pageManager.trialCount;
+        trialCount = mainMemo.trialCount;
         IconsDisplay(mainMemo.trial);
         StartCoroutine(ReturnToOtherPage());
     }
@@ -30,7 +29,7 @@ public class TaskMemo : MonoBehaviour
         yield return new WaitForSeconds(displayDuration);
         Destroy(mainMemo.gridCells[trialCount].transform.GetChild(0).gameObject);
         pageTask.SetActive(false);  // Hide the Grid Page
-        if (trialCount < pageManager.countMax - 1)
+        if (trialCount < mainMemo.countMax - 1)
             pagePrompt.SetActive(true); // Show the Other Page
         else
             Debug.Log("Reached maximum clicks. Stopping loop.");
