@@ -1,24 +1,26 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
+using UnityEngine.UI;
 
 public class MainMemo : MonoBehaviour
 {
-    public Transform gridContainer;
+    public Dictionary<string, GameObject> trial = null;
+    public readonly List<GameObject> gridCells = new();
     public GameObject gridPrefab;
+    public GameObject pagePrompt;
+    public Transform gridContainer;
     public int gridLength; // Determines grid size (2x2, 3x3, 4x4)
     public string iconFolderPath = @"D:\Files\Programming\Unity\LMT\Assets\Icons";
-
-    public readonly List<GameObject> gridCells = new();
-    public Dictionary<string, GameObject> trial = null;
     
     void Start()
     {
-        GenerateGrid(gridLength);
-        trial = GenerateTrialSet(gridLength);
+        GridGenerate(gridLength);
+        trial = TrialGenerate(gridLength);
+        pagePrompt.SetActive(true);
     }
 
-    void GenerateGrid(int gridLength)
+    void GridGenerate(int gridLength)
     {
         float gridCellSize = 100f;
         float spacing = 20f;
@@ -41,7 +43,7 @@ public class MainMemo : MonoBehaviour
         }
     }
 
-    Dictionary<string, GameObject> GenerateTrialSet(int gridLength)
+    Dictionary<string, GameObject> TrialGenerate(int gridLength)
     {
         var iconPaths = new List<string>(Directory.GetFiles(iconFolderPath, "*.png"));
         int trialCount = gridLength * gridLength;
@@ -62,5 +64,15 @@ public class MainMemo : MonoBehaviour
             int rand = Random.Range(0, i + 1);
             (list[i], list[rand]) = (list[rand], list[i]);
         }
+    }
+
+    public void IconGenerate(GameObject prefab, GameObject gridCell, string iconPath)
+    {
+        var iconTexture = new Texture2D(2, 2);
+        iconTexture.LoadImage(File.ReadAllBytes(iconPath));
+
+        Sprite iconSprite = Sprite.Create(iconTexture, new Rect(0, 0, iconTexture.width, iconTexture.height), new Vector2(0.5f, 0.5f));
+        var iconObject = Instantiate(prefab, gridCell.transform, false);
+        iconObject.GetComponent<Image>().sprite = iconSprite;
     }
 }

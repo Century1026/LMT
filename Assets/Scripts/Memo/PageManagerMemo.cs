@@ -4,28 +4,18 @@ public class PageManagerMemo : MonoBehaviour
 {
     public GameObject pagePrompt; // Reference to this (Other Page)
     public GameObject pageTask; // Reference to the Grid Page
-    private int clickCount = 0; // Counter for button clicks
-    public int maxClicks; // Maximum number of clicks to stop the loop
     public MainMemo mainMemo;
+    public PromptMemo promptMemo;
+    public int trialCount = 0; // Counter for button clicks
 
     public void OnButtonClick()
     {
-        if (mainMemo != null)
+        if (trialCount < (int)Mathf.Pow(mainMemo.gridLength, 2))
         {
-            int repeats = mainMemo.gridLength; // Assuming levelSelection determines maxRepeats
-            maxClicks = (int)Mathf.Pow(repeats, 2); // Square of levelSelection
-        }
-        else
-        {
-            Debug.LogError("mainMemo script not found. Defaulting maxRepeats to 5.");
-            maxClicks = 4;
-        }
-
-        clickCount++;
-        if (clickCount <= maxClicks)
-        {
+            // Destroy(promptMemo.imageContainer.transform.GetChild(0).gameObject);
             pagePrompt.SetActive(false); // Hide this page
             pageTask.SetActive(true);  // Show the Grid Page
+            trialCount++;
         }
         else
         {
