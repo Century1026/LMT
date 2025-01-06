@@ -13,6 +13,8 @@ public class MainMemo : MonoBehaviour
     public GameObject currentGrid;
     public Transform gridContainer;
     public PromptMemo promptMemo;
+    public PageManager PageManager;
+    public DifficultySlider difficultySlider;
     public Dictionary<string, GameObject> trial = null;
     public int gridLength = 2;
     public float displayDuration = 1f;
@@ -32,12 +34,11 @@ public class MainMemo : MonoBehaviour
         }
         else
         {
+            gridLength = (int)difficultySlider.slider.value + 2;
             countMax = (int)Mathf.Pow(gridLength, 2);
-            //gridLength = Difficulty;
         }
         GridGenerate(gridLength);
         trial = TrialGenerate(gridLength);
-        pagePrompt.SetActive(true);
     }
 
     void GridGenerate(int gridLength)
@@ -119,6 +120,6 @@ public class MainMemo : MonoBehaviour
             pagePrompt.SetActive(true); // Show the Other Page
         }
         else
-            Debug.Log("Reached maximum clicks. Stopping loop.");
+            PageManager.NavigateToNextPage();
     }
 }
