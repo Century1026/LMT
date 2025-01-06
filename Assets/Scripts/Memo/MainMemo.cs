@@ -10,20 +10,31 @@ public class MainMemo : MonoBehaviour
     public GameObject gridPrefab;
     public GameObject pagePrompt;
     public GameObject pageTask;
+    public GameObject currentGrid;
     public Transform gridContainer;
     public PromptMemo promptMemo;
-    public int gridLength;
-    public int trialCount = 0;
-    public float displayDuration = 1f;
     public Dictionary<string, GameObject> trial = null;
+    public int gridLength = 2;
+    public float displayDuration = 1f;
+    public bool isPractice;
 
     private int countMax;
+    private int trialCount = 0;
     private readonly List<GameObject> gridCells = new();
     private readonly string iconFolderPath = @"D:\Files\Programming\Unity\LMT\Assets\Icons";
 
     void Start()
     {
-        countMax = (int)Mathf.Pow(gridLength, 2);
+        if (isPractice)
+        {
+            countMax = 2;
+            gridLength = 3;
+        }
+        else
+        {
+            countMax = (int)Mathf.Pow(gridLength, 2);
+            //gridLength = Difficulty;
+        }
         GridGenerate(gridLength);
         trial = TrialGenerate(gridLength);
         pagePrompt.SetActive(true);
@@ -83,6 +94,10 @@ public class MainMemo : MonoBehaviour
         Sprite iconSprite = Sprite.Create(iconTexture, new Rect(0, 0, iconTexture.width, iconTexture.height), new Vector2(0.5f, 0.5f));
         var iconObject = Instantiate(imagePrefab, container.transform, false);
         iconObject.GetComponent<Image>().sprite = iconSprite;
+
+        //get grid reference for TaskMemo.cs
+        var keys = new List<string>(trial.Keys);
+        currentGrid = trial[keys[trialCount]];
     }
 
     public void OnButtonClick()
