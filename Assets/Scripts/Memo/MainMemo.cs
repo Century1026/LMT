@@ -1,22 +1,26 @@
 using System.Collections.Generic;
+using System.Collections;
+using UnityEngine.UI;
 using UnityEngine;
 using System.IO;
-using UnityEngine.UI;
 
 public class MainMemo : MonoBehaviour
 {
-    public Dictionary<string, GameObject> trial = null;
-    public readonly List<GameObject> gridCells = new();
+    public GameObject imagePrefab;
     public GameObject gridPrefab;
     public GameObject pagePrompt;
-    public GameObject pageTask; // Reference to the Grid Page
-    public PromptMemo promptMemo;
+    public GameObject pageTask;
     public Transform gridContainer;
-    public int gridLength; // Determines grid size (2x2, 3x3, 4x4)
-    public int trialCount = 0; // Counter for button clicks
-    public int countMax; // Maximum number of clicks
+    public PromptMemo promptMemo;
+    public int gridLength;
+    public int trialCount = 0;
+    public float displayDuration = 1f;
+    public Dictionary<string, GameObject> trial = null;
+
+    private int countMax;
+    private readonly List<GameObject> gridCells = new();
     private readonly string iconFolderPath = @"D:\Files\Programming\Unity\LMT\Assets\Icons";
-    
+
     void Start()
     {
         countMax = (int)Mathf.Pow(gridLength, 2);
@@ -71,13 +75,13 @@ public class MainMemo : MonoBehaviour
         }
     }
 
-    public void IconGenerate(GameObject prefab, GameObject gridCell, string iconPath)
+    public void IconGenerate(GameObject container)
     {
         var iconTexture = new Texture2D(2, 2);
-        iconTexture.LoadImage(File.ReadAllBytes(iconPath));
+        iconTexture.LoadImage(File.ReadAllBytes(new List<string>(trial.Keys)[trialCount]));
 
         Sprite iconSprite = Sprite.Create(iconTexture, new Rect(0, 0, iconTexture.width, iconTexture.height), new Vector2(0.5f, 0.5f));
-        var iconObject = Instantiate(prefab, gridCell.transform, false);
+        var iconObject = Instantiate(imagePrefab, container.transform, false);
         iconObject.GetComponent<Image>().sprite = iconSprite;
     }
 
@@ -86,6 +90,20 @@ public class MainMemo : MonoBehaviour
         Destroy(promptMemo.imageContainer.transform.GetChild(0).gameObject);
         pagePrompt.SetActive(false); // Hide this page
         pageTask.SetActive(true);  // Show the Grid Page
-        trialCount++;
+    }
+
+    public IEnumerator ReturnToOtherPage()
+    {
+        yield return new WaitForSeconds(displayDuration);
+        Destroy(gridCells[trialCount].transform.GetChild(0).gameObject);
+
+        pageTask.SetActive(false);  // Hide the Grid Page
+        if (trialCount < countMax - 1)
+        {
+            trialCount++;
+            pagePrompt.SetActive(true); // Show the Other Page
+        }
+        else
+            Debug.Log("Reached maximum clicks. Stopping loop.");
     }
 }
