@@ -15,12 +15,15 @@ public class MainMemo : MonoBehaviour
     public PromptMemo promptMemo;
     public PageManager PageManager;
     public DifficultySlider difficultySlider;
-    public Dictionary<string, GameObject> trial = null;
-    public int gridLength = 2;
+    public Dictionary<string, GameObject> trial;
+    public int practiceCount = 2;
+    public bool isPractice = true;
     public float displayDuration = 1f;
-    public bool isPractice;
 
+    private int gridLength;
+    private int runMax = 2;
     private int countMax;
+    private int runCount = 0;
     private int trialCount = 0;
     private readonly List<GameObject> gridCells = new();
     private readonly string iconFolderPath = @"D:\Files\Programming\Unity\LMT\Assets\Icons";
@@ -29,14 +32,13 @@ public class MainMemo : MonoBehaviour
     {
         if (isPractice)
         {
-            countMax = 2;
             gridLength = 3;
         }
         else
         {
             gridLength = (int)difficultySlider.slider.value + 2;
-            countMax = (int)Mathf.Pow(gridLength, 2);
         }
+        countMax = (int)Mathf.Pow(gridLength, 2);
         GridGenerate(gridLength);
         trial = TrialGenerate(gridLength);
     }
@@ -66,15 +68,16 @@ public class MainMemo : MonoBehaviour
 
     Dictionary<string, GameObject> TrialGenerate(int gridLength)
     {
-        var iconPaths = new List<string>(Directory.GetFiles(iconFolderPath, "*.png"));
         int trialCount = gridLength * gridLength;
-        
-        List<string> selectedIcons = iconPaths.GetRange(0, trialCount);
-        ShuffleList(gridCells);//shuffle pairs
-
         var iconPositionPairs = new Dictionary<string, GameObject>();
+        var iconPaths = new List<string>(Directory.GetFiles(iconFolderPath, "*.png"));
+        ShuffleList(iconPaths);
+        ShuffleList(gridCells);
+        List<string> selectedIcons = iconPaths.GetRange(0, trialCount);
+        
         for (int i = 0; i < trialCount; i++)
             iconPositionPairs[selectedIcons[i]] = gridCells[i];
+        
         return iconPositionPairs;
     }
 
@@ -104,22 +107,48 @@ public class MainMemo : MonoBehaviour
     public void OnButtonClick()
     {
         Destroy(promptMemo.imageContainer.transform.GetChild(0).gameObject);
-        pagePrompt.SetActive(false); // Hide this page
-        pageTask.SetActive(true);  // Show the Grid Page
+        pagePrompt.SetActive(false);
+        pageTask.SetActive(true);
     }
 
     public IEnumerator ReturnToOtherPage()
     {
         yield return new WaitForSeconds(displayDuration);
         Destroy(gridCells[trialCount].transform.GetChild(0).gameObject);
-
-        pageTask.SetActive(false);  // Hide the Grid Page
-        if (trialCount < countMax - 1)
+        pageTask.SetActive(false);
+        
+        if (runCount < runMax+1)
         {
-            trialCount++;
-            pagePrompt.SetActive(true); // Show the Other Page
+            if (trialCount < countMax - 1)
+            {
+                trialCount++;
+
+                // End practice
+                if (isPractice && trialCount == practiceCount)
+                {
+                    isPractice = false;
+                    trialCount = 0;
+                    gridLength = (int)difficultySlider.slider.value + 2;
+                    countMax = (int)Mathf.Pow(gridLength, 2);
+
+                    foreach (Transform child in gridContainer)
+                        Destroy(child.gameObject);
+                    gridCells.Clear();
+                    
+                    GridGenerate(gridLength);
+                    trial = TrialGenerate(gridLength);
+                }
+            }
+            else
+            {
+                trialCount = 0;
+                runCount++;
+            }
+            pagePrompt.SetActive(true);
         }
         else
+        {
             PageManager.NavigateToNextPage();
+        }
     }
 }
