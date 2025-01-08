@@ -15,7 +15,7 @@ public class PageManager : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("Page index out of range!");
+            currentPageIndex = 0;
         }
     }
 

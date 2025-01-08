@@ -3,29 +3,33 @@ using System.Collections;
 using UnityEngine.UI;
 using UnityEngine;
 using System.IO;
+using UnityEditor.Search;
 
 public class MainMemo : MonoBehaviour
 {
+    public List<KeyValuePair<Sprite, GameObject>> trial;
+    public DifficultySlider difficultySlider;
+    public Transform gridContainer;
+    // public PageManager memoPageManager;
+    public PageManager pageManager;
+    public PromptMemo promptMemo;
+    public TaskMemo taskMemo;
+    public GameObject currentGrid;
     public GameObject imagePrefab;
     public GameObject gridPrefab;
     public GameObject pagePrompt;
     public GameObject pageTask;
-    public GameObject currentGrid;
-    public Transform gridContainer;
-    public PromptMemo promptMemo;
-    public TaskMemo taskMemo;
-    public PageManager PageManager;
-    public DifficultySlider difficultySlider;
-    public List<KeyValuePair<Sprite, GameObject>> trial;
+    public GameObject instructionPractice;
+    public GameObject instructionTask;
     public int practiceCount = 2;
     public bool isPractice = true;
     public float displayDuration = 1f;
 
     private int gridLength;
-    private int runMax = 2;
-    private int countMax;
-    private int runCount = 0;
+    private int trialCountMax;
+    private int runCountMax = 2;
     private int trialCount = 0;
+    private int runCount = 0;
     private readonly string iconFolderPath = @"D:\Files\Programming\Unity\LMT\Assets\Icons";
 
     void Start()
@@ -33,12 +37,14 @@ public class MainMemo : MonoBehaviour
         if (isPractice)
         {
             gridLength = 3;
+            instructionPractice.SetActive(true);
         }
         else
         {
+            pagePrompt.SetActive(true);
             gridLength = (int)difficultySlider.slider.value + 2;
         }
-        countMax = (int)Mathf.Pow(gridLength, 2);
+        trialCountMax = (int)Mathf.Pow(gridLength, 2) - 1;
         List<GameObject> grid = GridGenerate(gridLength);
         trial = TrialGenerate(gridLength, grid);
     }
@@ -97,11 +103,10 @@ public class MainMemo : MonoBehaviour
 
     public void IconGenerate(GameObject container)
     {
-        
         var iconObject = Instantiate(imagePrefab, container.transform, false);
         iconObject.GetComponent<Image>().sprite = trial[trialCount].Key;
 
-        //get grid reference for TaskMemo.cs
+        //Get grid reference for TaskMemo.cs
         currentGrid = trial[trialCount].Value;
     }
 
@@ -118,37 +123,40 @@ public class MainMemo : MonoBehaviour
         Destroy(taskMemo.imageContainer.transform.GetChild(0).gameObject);
         pageTask.SetActive(false);
         
-        if (runCount < runMax)
+        if (runCount < runCountMax)
         {
-            if (trialCount < countMax - 1)
+            if (trialCount < trialCountMax)
             {
                 trialCount++;
 
                 // End practice
                 if (isPractice && trialCount == practiceCount)
                 {
-                    isPractice = false;
-                    trialCount = 0;
-                    gridLength = (int)difficultySlider.slider.value + 2;
-                    countMax = (int)Mathf.Pow(gridLength, 2);
-
                     foreach (Transform child in gridContainer)
                         Destroy(child.gameObject);
                     
+                    isPractice = false;
+                    trialCount = 0;
+                    gridLength = (int)difficultySlider.slider.value + 2;
+                    trialCountMax = (int)Mathf.Pow(gridLength, 2) - 1;
+                    
                     List<GameObject> grid = GridGenerate(gridLength);
                     trial = TrialGenerate(gridLength, grid);
+                    instructionTask.SetActive(true);
                 }
+                else
+                    pagePrompt.SetActive(true);
             }
             else
             {
                 trialCount = 0;
                 runCount++;
+                pagePrompt.SetActive(true);
             }
-            pagePrompt.SetActive(true);
         }
         else
         {
-            PageManager.NavigateToNextPage();
+            pageManager.NavigateToNextPage();
         }
     }
 }
