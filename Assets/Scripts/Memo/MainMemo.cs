@@ -13,9 +13,10 @@ public class MainMemo : MonoBehaviour
     public GameObject currentGrid;
     public Transform gridContainer;
     public PromptMemo promptMemo;
+    public TaskMemo taskMemo;
     public PageManager PageManager;
     public DifficultySlider difficultySlider;
-    public Dictionary<string, GameObject> trial;
+    public List<KeyValuePair<Sprite, GameObject>> trial;
     public int practiceCount = 2;
     public bool isPractice = true;
     public float displayDuration = 1f;
@@ -25,7 +26,6 @@ public class MainMemo : MonoBehaviour
     private int countMax;
     private int runCount = 0;
     private int trialCount = 0;
-    private readonly List<GameObject> gridCells = new();
     private readonly string iconFolderPath = @"D:\Files\Programming\Unity\LMT\Assets\Icons";
 
     void Start()
@@ -39,12 +39,13 @@ public class MainMemo : MonoBehaviour
             gridLength = (int)difficultySlider.slider.value + 2;
         }
         countMax = (int)Mathf.Pow(gridLength, 2);
-        GridGenerate(gridLength);
-        trial = TrialGenerate(gridLength);
+        List<GameObject> grid = GridGenerate(gridLength);
+        trial = TrialGenerate(gridLength, grid);
     }
 
-    void GridGenerate(int gridLength)
+    List<GameObject> GridGenerate(int gridLength)
     {
+        List<GameObject> gridCells = new();
         float gridCellSize = 100f;
         float spacing = 20f;
 
@@ -64,21 +65,25 @@ public class MainMemo : MonoBehaviour
                 gridCells.Add(gridCell);
             }
         }
+        ShuffleList(gridCells);
+        return gridCells;
     }
 
-    Dictionary<string, GameObject> TrialGenerate(int gridLength)
+    List<KeyValuePair<Sprite, GameObject>> TrialGenerate(int gridLength, List<GameObject> gridCells)
     {
         int trialCount = gridLength * gridLength;
-        var iconPositionPairs = new Dictionary<string, GameObject>();
-        var iconPaths = new List<string>(Directory.GetFiles(iconFolderPath, "*.png"));
+        var iconGridPairs = new List<KeyValuePair<Sprite, GameObject>>();
+        var iconPaths = new List<string>(Directory.GetFiles(iconFolderPath, "*.png")).GetRange(0, trialCount);
+
         ShuffleList(iconPaths);
-        ShuffleList(gridCells);
-        List<string> selectedIcons = iconPaths.GetRange(0, trialCount);
-        
         for (int i = 0; i < trialCount; i++)
-            iconPositionPairs[selectedIcons[i]] = gridCells[i];
-        
-        return iconPositionPairs;
+        {
+            var iconTexture = new Texture2D(2, 2);
+            iconTexture.LoadImage(File.ReadAllBytes(new List<string>(iconPaths)[i]));
+            Sprite iconSprite = Sprite.Create(iconTexture, new Rect(0, 0, iconTexture.width, iconTexture.height), new Vector2(0.5f, 0.5f));
+            iconGridPairs.Add(new KeyValuePair<Sprite, GameObject>(iconSprite, gridCells[i]));
+        }
+        return iconGridPairs;
     }
 
     void ShuffleList<T>(List<T> list)
@@ -92,16 +97,12 @@ public class MainMemo : MonoBehaviour
 
     public void IconGenerate(GameObject container)
     {
-        var iconTexture = new Texture2D(2, 2);
-        iconTexture.LoadImage(File.ReadAllBytes(new List<string>(trial.Keys)[trialCount]));
-
-        Sprite iconSprite = Sprite.Create(iconTexture, new Rect(0, 0, iconTexture.width, iconTexture.height), new Vector2(0.5f, 0.5f));
+        
         var iconObject = Instantiate(imagePrefab, container.transform, false);
-        iconObject.GetComponent<Image>().sprite = iconSprite;
+        iconObject.GetComponent<Image>().sprite = trial[trialCount].Key;
 
         //get grid reference for TaskMemo.cs
-        var keys = new List<string>(trial.Keys);
-        currentGrid = trial[keys[trialCount]];
+        currentGrid = trial[trialCount].Value;
     }
 
     public void OnButtonClick()
@@ -114,10 +115,10 @@ public class MainMemo : MonoBehaviour
     public IEnumerator ReturnToOtherPage()
     {
         yield return new WaitForSeconds(displayDuration);
-        Destroy(gridCells[trialCount].transform.GetChild(0).gameObject);
+        Destroy(taskMemo.imageContainer.transform.GetChild(0).gameObject);
         pageTask.SetActive(false);
         
-        if (runCount < runMax+1)
+        if (runCount < runMax)
         {
             if (trialCount < countMax - 1)
             {
@@ -133,10 +134,9 @@ public class MainMemo : MonoBehaviour
 
                     foreach (Transform child in gridContainer)
                         Destroy(child.gameObject);
-                    gridCells.Clear();
                     
-                    GridGenerate(gridLength);
-                    trial = TrialGenerate(gridLength);
+                    List<GameObject> grid = GridGenerate(gridLength);
+                    trial = TrialGenerate(gridLength, grid);
                 }
             }
             else

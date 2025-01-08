@@ -2,8 +2,8 @@ using UnityEngine;
 
 public class PromptMemo : MonoBehaviour
 {
-    public GameObject imageContainer;
     public MainMemo mainMemo;
+    public GameObject imageContainer;
 
     void OnEnable()
     {
